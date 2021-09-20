@@ -125,6 +125,49 @@ describe("Generator functions", () => {
       const whatsInItLast = genFn.next();
       expect(whatsInItLast).toEqual({ done: true, value: 5 });
     });
-    it("iterators", () => {});
+
+    it("iterators", () => {
+      function* genFnFactory() {
+        yield "1";
+        yield "2";
+        yield "3";
+      }
+      console.log("Iterables");
+      const genFn = genFnFactory();
+      for(const item of genFn) {
+        console.log("GenFn Item " + item);
+      }
+      let i = 0;
+      const myIterator = {
+        [Symbol.iterator]:() => {
+          return {next: () => {
+            i++
+            if(i<4) {
+              return {
+                value: i,
+                done: false
+              }
+            } 
+            return {
+              done: true
+            }
+          }}
+        }
+    }
+    for(const item of myIterator) {
+      console.log("Custome Iterator Item " + item);
+    } 
+
+    const myArray = ["1","2", "3"]
+    for(const item of myArray) {
+      console.log("Array Item " + item);
+    } 
+
+    const arrayIterator = myArray[Symbol.iterator]()
+    console.log("Array Iterator", arrayIterator.next());
+    console.log("Array Iterator", arrayIterator.next());
+    console.log("Array Iterator", arrayIterator.next());
+    console.log("Array Iterator", arrayIterator.next());
+    });
   });
   
