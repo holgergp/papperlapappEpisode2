@@ -1,14 +1,16 @@
 const logEffect = require("./logger").logEffect;
-const axios = require('axios');
+const axios = require("axios");
 const APICall1 = async () => {
-  return  axios.get("https://binaryjazz.us/wp-json/genrenator/v1/genre/")
+  return axios
+    .get("https://binaryjazz.us/wp-json/genrenator/v1/genre/")
     .then((r) => {
       console.log("Finished with ", r);
       return r;
     });
 };
 const APICall2 = async () => {
-  return  axios.get("https://binaryjazz.us/wp-json/genrenator/v1/count/")
+  return axios
+    .get("https://binaryjazz.us/wp-json/genrenator/v1/count/")
     .then((r) => {
       console.log("Finished with ", r);
       return r;
@@ -40,13 +42,14 @@ function runLoop(generator) {
     .catch((error) => generator.throw(error));
 }
 
+/**
 (async () => {
   await runSaga(function* () {
     const foo = yield call(APICall1);
     const foo2 = yield call(APICall2);
   });
 })();
-
+*/
 function call(method, args) {
   return { type: "call", method, args };
 }
@@ -59,10 +62,19 @@ async function runSaga(saga) {
     logEffect(effect);
     switch (effect.type) {
       case "call":
-        result = it.next(await effect.method(...(effect.args ?? [])));
+        result = it.next(
+          await effect.method(...(effect.args ? effect.args : []))
+        );
         break;
       default:
         break;
     }
   }
 }
+
+module.exports = {
+  APICall1,
+  APICall2,
+  runSaga,
+  call,
+};
