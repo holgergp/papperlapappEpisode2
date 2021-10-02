@@ -55,7 +55,24 @@ describe("Generator functions", () => {
     expect(whatsInItNow).toEqual({ done: false, value: "2" });
   });
 
-  it("our generator on a string", () => {
+  it("our generator listens (observer)", () => {
+    let consoleSimulator = [];
+
+    function* genFactoryObserver() {
+      while (true) {
+        const data = yield;
+        console.log(data);
+        consoleSimulator.push(data);
+      }
+    }
+    const genFn = genFactoryObserver();
+    genFn.next("Starting");
+    genFn.next("New Data");
+    genFn.next("Newish Data");
+    expect(consoleSimulator).toEqual(["New Data", "Newish Data"]);
+  });
+
+  it("our generator on a string (multitasking)", () => {
     function* numberGeneratorFactory() {
       let i = 0;
       while (true) {
@@ -128,7 +145,30 @@ describe("Generator functions", () => {
     expect(whatsInItLast).toEqual({ done: true, value: 5 });
   });
 
-  describe("iterators", () => {
+  function miniCo(generatorFactory) {
+    const generator = generatorFactory();
+    const result = generator.next();
+    console.log("First tick", result);
+
+    result.value
+      .then((ensuredValue) => {
+        const secondTick = generator.next(ensuredValue);
+        console.log("Second tick", secondTick);
+      })
+      .catch((error) => generator.throw(error));
+  }
+
+  it("Generators and Promises (a little advanced)", () => {
+    let consoleSimulator = [];
+
+    miniCo(function* () {
+      const a = yield Promise.resolve(1);
+      consoleSimulator.push(a);
+      expect(consoleSimulator).toEqual([1]);
+    });
+  });
+
+  describe.skip("iterators", () => {
     function* genFnFactory() {
       yield "1";
       yield "2";
